@@ -14,14 +14,27 @@ const btnNew = document.querySelector(".btn--new");
 const btnRoll = document.querySelector(".btn--roll");
 const btnHold = document.querySelector(".btn--hold");
 
-//Condições iniciais
-score0El.textContent = 0;
-score1El.textContent = 0;
-diceEl.classList.add("hidden");
+let scores, currentScore, activePlayer, playing;
 
-const scores = [0, 0];
-let currentScore = 0;
-let activePlayer = 0;
+//Condições iniciais
+const init = function () {
+  scores = [0, 0];
+  activePlayer = 0;
+  currentScore = 0;
+  playing = true;
+
+  score0El.textContent = 0;
+  score1El.textContent = 0;
+  current0El.textContent = 0;
+  current1El.textContent = 0;
+
+  diceEl.classList.add("hidden");
+  player0El.classList.remove("player--winner");
+  player1El.classList.remove("player--winner");
+  player0El.classList.add("player--active");
+  player1El.classList.remove("player--active");
+};
+init();
 
 const switchPlayer = function () {
   document.getElementById(`current--${activePlayer}`).textContent = 0;
@@ -33,32 +46,47 @@ const switchPlayer = function () {
 
 //Funcionalidade de rolar o dado
 btnRoll.addEventListener("click", function () {
-  //Gerar número aleatório do dado
-  const dice = Math.trunc(Math.random() * 6) + 1;
-  //Mostrar o dado
-  diceEl.classList.remove("hidden");
-  diceEl.src = `dice-${dice}.png`;
-  //Checar se o número foi 1
-  if (dice !== 1) {
-    //Adiciona o valor do dado aos pontos
-    currentScore += dice;
-    document.getElementById(`current--${activePlayer}`).textContent =
-      currentScore;
-  } else {
-    //Trocar de jogador
-    switchPlayer();
+  if (playing) {
+    //Gerar número aleatório do dado
+    const dice = Math.trunc(Math.random() * 6) + 1;
+    //Mostrar o dado
+    diceEl.classList.remove("hidden");
+    diceEl.src = `dice-${dice}.png`;
+    //Checar se o número foi 1
+    if (dice !== 1) {
+      //Adiciona o valor do dado aos pontos
+      currentScore += dice;
+      document.getElementById(`current--${activePlayer}`).textContent =
+        currentScore;
+    } else {
+      //Trocar de jogador
+      switchPlayer();
+    }
   }
 });
 
 //Funcionalidade do botão "Segurar"
 btnHold.addEventListener("click", function () {
-  {
+  if (playing) {
     //Adicionar pontos aos pontos totais
     scores[activePlayer] += currentScore;
     document.getElementById(`score--${activePlayer}`).textContent =
       scores[activePlayer];
-    //Checar se jogador chegou a 100 pontos: Terminar o jogo, Trocar jogador
 
-    switchPlayer();
+    //Checar se jogador chegou a 100 pontos: Terminar o jogo, Trocar jogador
+    if (scores[activePlayer] >= 100) {
+      playing = false;
+      diceEl.classList.add("hidden");
+      document
+        .querySelector(`.player--${activePlayer}`)
+        .classList.add("player--winner");
+      document
+        .querySelector(`.player--${activePlayer}`)
+        .classList.remove("player--active");
+    } else {
+      switchPlayer();
+    }
   }
 });
+
+btnNew.addEventListener("click", init);
